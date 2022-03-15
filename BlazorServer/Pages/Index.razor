@@ -1,0 +1,90 @@
+﻿@page "/"
+
+@attribute [Authorize]
+
+<button class="btn btn-danger mb-3" @onclick="MostrarRoles">Mostrar Lista</button>
+
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <select class="form-control" @onchange="OnTopChange">
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select class="form-control" @onchange="OnYearChange">
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+        </select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <ResumenVentasComponent Nombre="Producto" Model="Productos" />
+    </div>
+
+    <div class="col-md-4">
+        <ResumenVentasComponent Nombre="Categoria" Model="Categorias" />
+
+    </div>
+    <div class="col-md-4">
+        <ResumenVentasComponent Nombre="Cliente" Model="Clientes" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <ResumenVentasComponent Nombre="Mes" Model="VentasMes" />
+    </div>
+</div>
+
+@inject FacturaServices facturaService
+
+@inject RolesServices rolesServices
+
+@code{
+    List<Rol> listaRoles = new List<Rol>();
+
+    private void MostrarRoles()
+    {
+        var lista = rolesServices.ListaRoles();
+    }
+
+
+    //------------------------------//
+     public int Top { get; set; } = 3;
+    public int Año { get; set; } = 2021;
+
+    public List<ResumenVentaModel> Productos { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> Categorias { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> Clientes { get; set; } = new List<ResumenVentaModel>();
+    public List<ResumenVentaModel> VentasMes { get; set; } = new List<ResumenVentaModel>();
+
+
+    protected override void OnInitialized()
+    {
+        CargarDatos();
+    }
+
+    protected void CargarDatos()
+    {
+        Productos = facturaService.ProductosMasVentidos(Top);
+        Categorias = facturaService.MejoresCategorias(Top);
+        Clientes = facturaService.MejoresClientes(Top);
+        VentasMes = facturaService.VentasPorMes(Año, Top);
+    }
+
+    protected void OnTopChange(ChangeEventArgs e)
+    {
+        Top = Convert.ToInt32(e.Value);
+        CargarDatos();
+    }
+
+    protected void OnYearChange(ChangeEventArgs e)
+    {
+        Año = Convert.ToInt32(e.Value);
+        CargarDatos();
+    }
+}

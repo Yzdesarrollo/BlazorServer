@@ -1,0 +1,78 @@
+﻿@page "/localstorage"
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <label>Nombre</label>
+            <input type="text" class="form-control" @bind="usuario.Nombre" />
+        </div>
+        <div class="col-md-6">
+            <label>Correo</label>
+            <input type="email" class="form-control" @bind-value="usuario.Correo" />
+        </div>
+    </div>
+    <button type="button" class="mt-3 btn btn-primary" @onclick="Add">Enviar</button>
+    <button type="button" class="mt-3 btn btn-success" @onclick="GuardarLocalStorage">Guardar</button>
+    <button type="button" class="mt-3 btn btn-warning" @onclick="MostrarLocalStorage">Mostrar</button>
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Correo</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in listaUsuarios)
+                {
+                    <tr>
+                        <td>@item.Nombre</td>
+                        <td>@item.Correo</td>
+                        <td>
+                            <button class="btn btn-danger" @onclick="(()=>Remove(item))">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@inject ILocalStorageService localstorage
+
+@code {
+    User usuario = new User();
+    List<User> listaUsuarios = new List<User>();
+
+    private void Add()
+    {
+        listaUsuarios.Add(usuario);
+        //await localstorage.SetItemAsync<User>("user", usuario);
+        usuario = new User();
+    }
+
+    private void Remove(User model)
+    {
+        listaUsuarios.Remove(model);
+    }
+
+    private async Task GuardarLocalStorage()
+    {
+        await localstorage.SetItemAsync<List<User>>("users", listaUsuarios);
+    }
+
+    private async Task MostrarLocalStorage()
+    {
+        var lista = await localstorage.GetItemAsync<List<User>>("users");
+
+        if (lista == null)
+        {
+            listaUsuarios = new List<User>();
+        }
+        else
+        {
+            listaUsuarios = lista;
+        }
+    }
+}

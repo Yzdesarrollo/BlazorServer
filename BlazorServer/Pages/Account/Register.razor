@@ -1,0 +1,101 @@
+﻿@page "/account/register"
+@layout UnauthorizedLayout
+
+<div class="container">
+    <div class="col-md-6 offset-md-3">
+
+        <div class="card">
+            <div class="card-header">
+                <h4>Mi Tienda</h4>
+            </div>
+            <div class="card-body">
+                <EditForm Model="Model" OnValidSubmit="Registrar">
+                    <DataAnnotationsValidator />
+                <h4 class="card-title text-center">Registro de Usuario</h4>
+                <div class="col-md-12 mb-3">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" @bind="Model.Nombre" />
+                    <ValidationMessage For="@(() => Model.Nombre)"/>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Email</label>
+                    <input type="email" class="form-control" @onchange="ValidarEmail" />                    
+                     <ValidationMessage For="@(() => Model.Email)"/>
+                      @if(MostrarMensaje)
+                        {
+                            <span class="text-danger">El email ya esta registrado.</span>
+                        }
+                    </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Contraseña</label>
+                    <input type="password" class="form-control" @bind="Model.Clave" />
+                     <ValidationMessage For="@(() => Model.Clave)"/>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label>Confirmar contraseña</label>
+                    <input type="password" class="form-control" @bind="Model.ConfirmPassword" />
+                     <ValidationMessage For="@(() => Model.ConfirmPassword)"/>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <button class="btn btn-primary btn-block"
+                            @onclick="Registrar">Registrarme</button>
+                </div>
+                   </EditForm>
+                <div class="col-md-12 mb-3">
+                    <hr />
+                </div>
+                <div class="col-md-12 mb-3">
+                    <h5>¿Ya tienes una cuenta?</h5>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <a href="/account/login"
+                       class="btn btn-success btn-block">Iniciar Sesión Ahora</a>
+                </div>
+             
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject UsuariosServices usuarioServices
+@inject NavigationManager Nav
+
+@code {
+    public bool MostrarMensaje { get; set; } = false;      
+
+    public RegistroUsuarioModel Model { get; set; } = new RegistroUsuarioModel
+    {
+        IdRol = 5,
+    };
+
+    string msj = string.Empty;
+
+    protected void Registrar()
+    {
+        var res =  usuarioServices.Registrar(Model);
+
+        if (res.IsSuccess)
+        {
+            //msj = res.Message;
+            Nav.NavigateTo("/account/login");
+        }
+        else
+        {
+            //msj = res.Message;
+        }
+    }
+
+    protected void ValidarEmail(ChangeEventArgs e)
+    {
+        var res = usuarioServices.ValidarEmail(e.Value.ToString());
+        MostrarMensaje = res.IsSuccess;
+
+        Model.Email = e.Value.ToString();
+    }
+
+}
